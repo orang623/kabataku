@@ -33,17 +33,24 @@ let timeLeft = 60, timerId = null, isPlaying = false;
 
 
 function saveToLeaderboard(name, score) {
+    console.log("Mencoba menyimpan skor..."); 
     const leaderboardRef = ref(db, 'leaderboard');
-    const newEntryRef = push(leaderboardRef);
-    set(newEntryRef, {
+    const newScoreRef = push(leaderboardRef);
+    
+    set(newScoreRef, {
         name: name,
-        score: score,
-        date: new Date().toISOString()
-    }).then(() => {
-        window.location.href = "leaderboard.html";
+        score: parseInt(score), 
+        timestamp: Date.now()
+    })
+    .then(() => {
+        console.log("Data berhasil masuk!");
+        window.location.href = "leaderboard.html"; 
+    })
+    .catch((error) => {
+        console.error("Gagal simpan:", error);
+        alert("Terjadi kesalahan saat menyimpan skor.");
     });
 }
-
 
 function SetUp() {
     while (index === lastIndex) { index = Math.floor(Math.random() * baku.length); }
