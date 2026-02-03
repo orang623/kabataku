@@ -4,6 +4,7 @@ import { getDatabase, ref, onValue, query, orderByChild, limitToLast } from "htt
 const firebaseConfig = {
   apiKey: "AIzaSyDRDVU-FQANzQIpHw6buxDi-DI6bJ8AcUE",
   authDomain: "kabataku-project.firebaseapp.com",
+  databaseURL: "https://kabataku-project-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "kabataku-project",
   storageBucket: "kabataku-project.firebasestorage.app",
   messagingSenderId: "286516922186",
@@ -35,3 +36,4 @@ function loadLeaderboard() {
 }
 
 loadLeaderboard();
+
