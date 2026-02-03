@@ -1,64 +1,37 @@
-document.addEventListener('DOMContentLoaded', loadLeaderboard);
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, onValue, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-function getLeaderboardData() {
-    const data = localStorage.getItem('leaderboard');
-    return data ? JSON.parse(data) : [];
-}
+const firebaseConfig = {
+  apiKey: "AIzaSyDRDVU-FQANzQIpHw6buxDi-DI6bJ8AcUE",
+  authDomain: "kabataku-project.firebaseapp.com",
+  projectId: "kabataku-project",
+  storageBucket: "kabataku-project.firebasestorage.app",
+  messagingSenderId: "286516922186",
+  appId: "1:286516922186:web:ea81fa4e3c3cffc93323b3",
+  measurementId: "G-EZKF6XJHPW"
+};
 
-function saveLeaderboardData(data) {
-    localStorage.setItem('leaderboard', JSON.stringify(data));
-}
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-function addEntry() {
-    const nameInput = document.getElementById('playerName');
-    const scoreInput = document.getElementById('playerScore');
-    const name = nameInput.value;
-    const score = parseInt(scoreInput.value);
-
-    if (name === '' || isNaN(score)) {
-        alert("Mohon isi nama dan skor dengan benar!");
-        return;
-    }
-
-    const leaderboard = getLeaderboardData();
+function loadLeaderboard() {
     
-
-    leaderboard.push({ name, score });
-
-    leaderboard.sort((a, b) => b.score - a.score);
-
-    saveLeaderboardData(leaderboard);
-    renderTable(leaderboard);
-
-    nameInput.value = '';
-    scoreInput.value = '';
-}
-
-function renderTable(data) {
-    const tbody = document.getElementById('leaderboardBody');
-    tbody.innerHTML = ''; 
-
-    data.forEach((entry, index) => {
-        const row = `
-            <tr>
-                <td>${index + 1}</td>
-                <td>${entry.name}</td>
-                <td>${entry.score}</td>
-            </tr>
-        `;
-        tbody.innerHTML += row;
+    const leaderboardRef = query(ref(db, 'leaderboard'), orderByChild('score'), limitToLast(10));
+    
+    onValue(leaderboardRef, (snapshot) => {
+        const data = snapshot.val();
+        let scores = [];
+        for (let id in data) { scores.push(data[id]); }
+        
+       
+        scores.sort((a, b) => b.score - a.score);
+        
+        const tbody = document.getElementById('leaderboardBody');
+        tbody.innerHTML = ''; 
+        scores.forEach((entry, index) => {
+            tbody.innerHTML += `<tr><td>${index + 1}</td><td>${entry.name}</td><td>${entry.score}</td></tr>`;
+        });
     });
 }
 
-function loadLeaderboard() {
-    const data = getLeaderboardData();
-    data.sort((a, b) => b.score - a.score); 
-    renderTable(data);
-}
-
-function clearData() {
-    if(confirm("Yakin ingin menghapus semua data?")) {
-        localStorage.removeItem('leaderboard');
-        renderTable([]);
-    }
-}
+loadLeaderboard();
