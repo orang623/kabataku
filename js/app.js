@@ -64,7 +64,6 @@ function SetUp() {
 }
 
 function answer(e) {
-    if (!isPlaying) return alert("Klik Mulai dulu!");
     if (e.currentTarget.textContent === baku[lastIndex]) {
         answerText.textContent = "Benar!";
         correctCount++; correctStat.textContent = correctCount;
