@@ -1,7 +1,7 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f0f2f5;
-    color: #ffffff;
+    color: #333;
     display: flex;
     justify-content: center;
     padding-top: 50px;
@@ -56,4 +56,5 @@ tbody tr:nth-child(3) td { font-weight: bold; color: #cd7f32; }
     background-color: #ff4d4d;
     margin-top: 20px;
     font-size: 12px;
+
 }
