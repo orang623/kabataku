@@ -31,27 +31,6 @@ let lastIndex = -1, index = -1;
 let correctCount = 0, wrongCount = 0;
 let timeLeft = 60, timerId = null, isPlaying = false;
 
-
-function saveToLeaderboard(name, score) {
-    console.log("Mencoba menyimpan skor..."); 
-    const leaderboardRef = ref(db, 'leaderboard');
-    const newScoreRef = push(leaderboardRef);
-    
-    set(newScoreRef, {
-        name: name,
-        score: parseInt(score), 
-        timestamp: Date.now()
-    })
-    .then(() => {
-        console.log("Data berhasil masuk!");
-        window.location.href = "leaderboard.html"; 
-    })
-    .catch((error) => {
-        console.error("Gagal simpan:", error);
-        alert("Terjadi kesalahan saat menyimpan skor.");
-    });
-}
-
 function SetUp() {
     while (index === lastIndex) { index = Math.floor(Math.random() * baku.length); }
     const correctButton = Math.floor(Math.random() * 2);
@@ -66,31 +45,95 @@ function SetUp() {
 function answer(e) {
     if (e.currentTarget.textContent === baku[lastIndex]) {
         answerText.textContent = "Benar!";
-        correctCount++; correctStat.textContent = correctCount;
+        answerText.style.color = "var(--correctColor)";
+        
+        if (isPlaying) {
+            correctCount++; 
+            correctStat.textContent = correctCount;
+        }
     } else {
-        answerText.textContent = "Salah!";
-        wrongCount++; wrongStat.textContent = wrongCount;
+        answerText.textContent = "Salah! (Skor -1)";
+        answerText.style.color = "var(--wrongColor)";
+        
+        if (isPlaying) {
+            if (correctCount > 0) correctCount--; 
+            correctStat.textContent = correctCount;
+            wrongCount++; 
+            wrongStat.textContent = wrongCount;
+        }
     }
     SetUp();
 }
 
-startBtn.addEventListener('click', () => {
-    if (isPlaying) return;
-    isPlaying = true; correctCount = 0; wrongCount = 0; timeLeft = 60;
-    correctStat.textContent = '0'; wrongStat.textContent = '0';
-    startBtn.disabled = true;
-    timerId = setInterval(() => {
-        timeLeft--; timerDisplay.textContent = timeLeft;
-        if (timeLeft <= 0) {
-            clearInterval(timerId); isPlaying = false;
-            startBtn.disabled = false;
-            const name = prompt(`Waktu Habis! Skor: ${correctCount}. Nama:`);
-            if (name) saveToLeaderboard(name, correctCount);
-        }
-    }, 1000);
-    SetUp();
-});
+function saveToLeaderboard(name, score) {
+    const leaderboardRef = ref(db, 'leaderboard');
+    const newScoreRef = push(leaderboardRef);
+    set(newScoreRef, {
+        name: name,
+        score: parseInt(score), 
+        timestamp: Date.now()
+    })
+    .then(() => {
+        window.location.href = "leaderboard.html"; 
+    })
+    .catch((error) => {
+        console.error("Gagal simpan:", error);
+    });
+}
 
-btn1.addEventListener('click', answer);
-btn2.addEventListener('click', answer);
-SetUp();
+window.addEventListener('DOMContentLoaded', () => {
+    
+    
+    SetUp();
+
+    btn1.addEventListener('click', answer);
+    btn2.addEventListener('click', answer);
+
+    window.addEventListener('keydown', (e) => {
+        
+        if (e.key === "ArrowLeft" || e.key === "a") {
+            btn1.click();
+        } else if (e.key === "ArrowRight" || e.key === "d") {
+            btn2.click();
+        }
+    });
+
+startBtn.addEventListener('click', () => {
+        if (isPlaying) return;
+        
+        isPlaying = true; 
+        correctCount = 0; 
+        wrongCount = 0; 
+        timeLeft = 60;
+        
+        correctStat.textContent = '0'; 
+        wrongStat.textContent = '0';
+        timerDisplay.textContent = '60';
+        startBtn.disabled = true;
+        startBtn.style.opacity = "0.5"; 
+
+        timerId = setInterval(() => {
+            timeLeft--; 
+            timerDisplay.textContent = timeLeft;
+            
+            if (timeLeft <= 0) {
+                clearInterval(timerId); 
+                isPlaying = false;
+                startBtn.disabled = false;
+                startBtn.style.opacity = "1";
+
+                
+                setTimeout(() => {
+                    const name = prompt(`Waktu Habis!\nSkor Akhir: ${correctCount}\nMasukkan namamu:`);
+                    if (name && name.trim() !== "") {
+                        saveToLeaderboard(name, correctCount);
+                    } else {
+                        alert("Skor tidak disimpan karena nama kosong.");
+                    }
+                }, 100);
+            }
+        }, 1000);
+        
+        SetUp();
+    });
+});
