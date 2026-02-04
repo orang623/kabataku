@@ -16,24 +16,38 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 function loadLeaderboard() {
-    
-    const leaderboardRef = query(ref(db, 'leaderboard'), orderByChild('score'), limitToLast(10));
+    const leaderboardRef = query(
+        ref(db, 'leaderboard'), 
+        orderByChild('score'), 
+        limitToLast(10) 
+    );
     
     onValue(leaderboardRef, (snapshot) => {
         const data = snapshot.val();
         let scores = [];
-        for (let id in data) { scores.push(data[id]); }
         
-       
+        for (let id in data) { 
+            scores.push(data[id]); 
+        }
+        
+        
         scores.sort((a, b) => b.score - a.score);
         
         const tbody = document.getElementById('leaderboardBody');
         tbody.innerHTML = ''; 
+        
         scores.forEach((entry, index) => {
-            tbody.innerHTML += `<tr><td>${index + 1}</td><td>${entry.name}</td><td>${entry.score}</td></tr>`;
+          
+            tbody.innerHTML += `
+                <tr class="rank-${index + 1}">
+                    <td>${index + 1}</td>
+                    <td>${entry.name}</td>
+                    <td>${entry.score}</td>
+                </tr>`;
         });
     });
 }
 
 loadLeaderboard();
+
 
